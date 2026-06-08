@@ -412,10 +412,10 @@ function App() {
 
             {/* RIGHT SIDE: THE GRAPH (Previously left side) */}
             <div className="w-full lg:w-[55%] relative flex items-center justify-center min-h-[300px] md:min-h-[350px]">
-              <div className="w-full h-full relative z-10 opacity-100 drop-shadow-2xl flex items-center justify-center">
+              <div className="w-full relative z-10 opacity-100 drop-shadow-2xl flex items-center justify-center">
                 <svg 
                   viewBox="0 0 1000 600" 
-                  className="w-full h-full max-h-[350px]"
+                  className="w-full h-auto max-h-[350px]"
                   preserveAspectRatio="xMidYMid meet"
                 >
                   <defs>

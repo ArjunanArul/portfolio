@@ -3,6 +3,16 @@ import { motion } from "framer-motion"
 import { useState, useEffect, useRef } from "react"
 
 export function MeshGradientSVG() {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
   const colors = [
     "#FFB3D9", // Pastel pink
     "#87CEEB", // Sky blue
@@ -64,7 +74,13 @@ export function MeshGradientSVG() {
 
         <foreignObject width="231" height="289" clipPath="url(#shapeClip)">
           <div className="w-full h-full">
-            <MeshGradient colors={colors} className="w-full h-full" speed={1} />
+            {isMobile ? (
+              <div 
+                className="w-full h-full bg-gradient-to-tr from-[#FFB3D9] via-[#87CEEB] to-[#4A90E2]"
+              />
+            ) : (
+              <MeshGradient colors={colors} className="w-full h-full" speed={1} />
+            )}
           </div>
         </foreignObject>
 
