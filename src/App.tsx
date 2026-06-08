@@ -3,7 +3,6 @@ import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 
 import NeuralBackground from './components/ui/flow-field-background';
 import { MeshGradientSVG } from './components/ui/shader-svg';
 import { DottedSurface } from './components/ui/dotted-surface';
-import { WorkstationSchematic } from './components/ui/workstation-schematic';
 
 function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -12,46 +11,14 @@ function App() {
   const frameCount = 178;
 
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [currentPath, setCurrentPath] = useState(() => {
-    const path = window.location.pathname;
-    const hash = window.location.hash;
-    if (path === '/atlast' || path === '/atlast/' || hash === '#/atlast' || hash === '#atlast') {
-      return 'atlast';
-    }
-    return 'home';
-  });
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    const handleLocationChange = () => {
-      const path = window.location.pathname;
-      const hash = window.location.hash;
-      if (path === '/atlast' || path === '/atlast/' || hash === '#/atlast' || hash === '#atlast') {
-        setCurrentPath('atlast');
-      } else {
-        setCurrentPath('home');
-      }
-    };
     window.addEventListener('resize', handleResize);
-    window.addEventListener('popstate', handleLocationChange);
-    window.addEventListener('hashchange', handleLocationChange);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('popstate', handleLocationChange);
-      window.removeEventListener('hashchange', handleLocationChange);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const navigateTo = (path: 'home' | 'atlast') => {
-    if (path === 'atlast') {
-      window.location.hash = '#/atlast';
-    } else {
-      window.location.hash = '#/';
-    }
-    setCurrentPath(path);
-  };
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -121,15 +88,6 @@ function App() {
 
   // We gracefully fade the canvas video out during the final 100vh overlap (0.8 to 1.0)
   const canvasOpacity = useTransform(smoothProgress, [0.8, 1], [1, 0]);
-
-  if (currentPath === 'atlast') {
-    return (
-      <WorkstationSchematic 
-        fullscreen 
-        onBackToPortfolio={() => navigateTo('home')} 
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen text-white font-sans selection:bg-white/20">
@@ -886,43 +844,6 @@ function App() {
                 Other Works
               </h3>
             </motion.div>
-          </div>
-        </div>
-      </motion.section>
-
-      {/* SYSTEM SCHEMATIC SECTION */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 1.5, ease: "easeInOut" }}
-        className="relative z-20 py-16 lg:py-24 flex flex-col justify-center px-4 md:px-8 border-t border-white/5 bg-[#030303] overflow-hidden"
-      >
-        <div className="w-full max-w-5xl mx-auto relative z-10 drop-shadow-2xl">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight uppercase mb-3 drop-shadow-lg text-white">
-              System Schematic
-            </h2>
-            <p className="text-indigo-400 text-xs md:text-sm uppercase tracking-[0.2em] font-bold">
-              Interactive 3D Digital Twin Workstation
-            </p>
-            <div className="mt-4 pointer-events-auto">
-              <button
-                onClick={() => navigateTo('atlast')}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/30 hover:bg-indigo-500/20 text-indigo-400 hover:text-indigo-300 rounded-full font-mono text-[0.65rem] tracking-widest uppercase transition-all duration-300 cursor-pointer shadow-lg"
-              >
-                Launch Dedicated Console &rarr;
-              </button>
-            </div>
-          </motion.div>
-
-          <div className="w-full max-w-4xl mx-auto">
-            <WorkstationSchematic />
           </div>
         </div>
       </motion.section>
