@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
 import NeuralBackground from './components/ui/flow-field-background';
 import { MeshGradientSVG } from './components/ui/shader-svg';
@@ -9,6 +9,16 @@ function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const frameCount = 178;
+
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -45,6 +55,8 @@ function App() {
   };
 
   useEffect(() => {
+    if (isMobile) return;
+    
     const loadedImages: HTMLImageElement[] = [];
     
     for (let i = 1; i <= frameCount; i++) {
@@ -58,9 +70,10 @@ function App() {
         loadedImages.push(img);
     }
     imagesRef.current = loadedImages;
-  }, []);
+  }, [isMobile]);
 
   useMotionValueEvent(smoothProgress, "change", (latest) => {
+    if (isMobile) return;
     const maxIndex = frameCount - 1;
     // Map scroll progress [0, 0.8] to frame index [0, maxIndex] to ensure the animation
     // reaches its last frame fully visible before the canvas starts fading out.
@@ -92,17 +105,26 @@ function App() {
          <div className="absolute inset-0 bg-gradient-to-b from-[#010101]/90 via-transparent to-[#030303]/90 pointer-events-none" />
       </div>
 
-      {/* 300vh SCROLLING HERO SECTION (plays animation across exactly two viewport heights of scroll) */}
-      <div ref={containerRef} className="relative z-10" style={{ height: "300vh" }}>
+      {/* 300vh SCROLLING HERO SECTION (plays animation across exactly two viewport heights of scroll, 100vh on mobile) */}
+      <div ref={containerRef} className="relative z-10" style={{ height: isMobile ? "100vh" : "300vh" }}>
         <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center">
           
-          {/* NATIVE CANVAS BACKGROUND */}
+          {/* NATIVE CANVAS OR FALLBACK IMAGE BACKGROUND */}
           <motion.div style={{ opacity: canvasOpacity }} className="absolute inset-0 z-0 bg-black">
-            <canvas 
-              ref={canvasRef}
-              className="w-full h-full object-cover scale-[1.01]"
-              style={{ filter: "contrast(1.03) saturate(1.05)" }}
-            />
+            {isMobile ? (
+              <img 
+                src="/images/herosection/ezgif-frame-001.jpg"
+                alt="Hero background"
+                className="w-full h-full object-cover scale-[1.01] opacity-30"
+                style={{ filter: "contrast(1.03) saturate(1.05)" }}
+              />
+            ) : (
+              <canvas 
+                ref={canvasRef}
+                className="w-full h-full object-cover scale-[1.01]"
+                style={{ filter: "contrast(1.03) saturate(1.05)" }}
+              />
+            )}
             {/* Subtle gradient overlay to retain visual depth */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent mix-blend-multiply"></div>
           </motion.div>
@@ -135,7 +157,7 @@ function App() {
               className="absolute bottom-12 flex flex-col items-center gap-2"
             >
               <span className="text-[0.65rem] font-bold tracking-[0.25em] uppercase text-white drop-shadow-md animate-pulse">
-                Swipe to know more
+                {isMobile ? "Scroll to know more" : "Swipe to know more"}
               </span>
               <motion.div 
                 animate={{ y: [0, 6, 0] }}
@@ -148,13 +170,13 @@ function App() {
         </div>
       </div>
 
-      {/* ABOUT ME SECTION (Overlaps the final 100vh of the hero scroll with negative margin!) */}
+      {/* ABOUT ME SECTION (Overlaps the final 100vh of the hero scroll on desktop with negative margin!) */}
       <motion.section 
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
-        className="relative z-20 min-h-screen py-24 flex flex-col justify-center px-4 md:px-8 -mt-[100vh] overflow-hidden bg-black/60 backdrop-blur-sm"
+        className="relative z-20 min-h-screen py-24 flex flex-col justify-center px-4 md:px-8 mt-0 md:-mt-[100vh] overflow-hidden bg-black/60 backdrop-blur-sm"
       >
         <DottedSurface />
         <div className="w-full max-w-7xl mx-auto relative z-10 flex flex-col lg:flex-row gap-16 lg:gap-20 items-center">
