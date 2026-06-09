@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, useMotionValueEvent, AnimatePresence } from 'framer-motion';
 import NeuralBackground from './components/ui/flow-field-background';
 import { MeshGradientSVG } from './components/ui/shader-svg';
 import { DottedSurface } from './components/ui/dotted-surface';
@@ -11,6 +11,8 @@ function App() {
   const frameCount = 178;
 
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [isPreloading, setIsPreloading] = useState(!isMobile);
+  const [loadedCount, setLoadedCount] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,22 +57,45 @@ function App() {
   };
 
   useEffect(() => {
-    if (isMobile) return;
+    if (isMobile) {
+      setIsPreloading(false);
+      return;
+    }
     
     const loadedImages: HTMLImageElement[] = [];
+    let loaded = 0;
     
     for (let i = 1; i <= frameCount; i++) {
         const img = new Image();
         img.src = `/images/herosection/ezgif-frame-${String(i).padStart(3, '0')}.jpg`;
         
-        img.onload = async () => {
+        const handleImageLoad = async () => {
             try { await img.decode(); } catch(e) {}
+            loaded++;
+            setLoadedCount(loaded);
             if (i === 1) requestAnimationFrame(() => drawToCanvas(0));
-        }
+        };
+
+        const handleImageError = () => {
+            loaded++;
+            setLoadedCount(loaded);
+        };
+
+        img.onload = handleImageLoad;
+        img.onerror = handleImageError;
         loadedImages.push(img);
     }
     imagesRef.current = loadedImages;
   }, [isMobile]);
+
+  useEffect(() => {
+    if (!isMobile && loadedCount >= frameCount) {
+      const timer = setTimeout(() => {
+        setIsPreloading(false);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [loadedCount, isMobile]);
 
   useMotionValueEvent(smoothProgress, "change", (latest) => {
     if (isMobile) return;
@@ -93,6 +118,51 @@ function App() {
     <div className="min-h-screen text-white font-sans selection:bg-white/20">
       <div className="noise" />
 
+      <AnimatePresence>
+        {isPreloading && (
+          <motion.div
+            key="preloader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }}
+            className="fixed inset-0 z-[9999] bg-[#030303] flex flex-col items-center justify-center font-mono select-none px-6"
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+            
+            <div className="w-full max-w-md flex flex-col items-start gap-4 z-10">
+              <div className="w-full flex justify-between items-end text-xs text-white/40 tracking-widest uppercase">
+                <span className="text-indigo-400 font-bold animate-pulse">▲ ARJUN_ARUL.SYS</span>
+                <span>STABLE v2.04</span>
+              </div>
+              
+              <div className="text-xl md:text-2xl font-bold tracking-tight text-white/90 uppercase mt-4">
+                Loading Visual Assets
+              </div>
+
+              <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden relative">
+                <motion.div 
+                  className="h-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-300 rounded-full"
+                  style={{ width: `${(loadedCount / frameCount) * 100}%` }}
+                />
+              </div>
+
+              <div className="w-full flex justify-between text-xs text-white/60 tracking-wider">
+                <span>{loadedCount} / {frameCount} FRAMES DECODED</span>
+                <span className="font-bold text-white text-sm">
+                  {Math.round((loadedCount / frameCount) * 100)}%
+                </span>
+              </div>
+
+              <div className="w-full mt-6 p-4 bg-white/[0.02] border border-white/5 rounded-2xl text-[10px] text-white/30 space-y-1 select-none">
+                <div>&gt; CONNECTING TO CDN REPOSITORY... OK</div>
+                <div>&gt; DOWNLOADING SEQUENCE: ezgif-frame-{String(Math.min(frameCount, loadedCount + 1)).padStart(3, '0')}.jpg</div>
+                <div>&gt; HARDWARE ACCELERATED RENDER PIXEL BUFFERS... ACTIVE</div>
+                <div>&gt; READY STATE: {loadedCount === frameCount ? "COMPLETE" : "COMPILING..."}</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* BACKGROUND LAYER: Flow field runs globally behind the entire site */}
       {/* This ensures that when the hero video fades out, the particles are seamlessly revealed behind it */}
       <div className="fixed inset-0 z-[-1] bg-black">
@@ -107,10 +177,10 @@ function App() {
 
       {/* 300vh SCROLLING HERO SECTION (plays animation across exactly two viewport heights of scroll, 100vh on mobile) */}
       <div ref={containerRef} className="relative z-10" style={{ height: isMobile ? "100vh" : "300vh" }}>
-        <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center">
+        <div className={`${isMobile ? "relative" : "sticky top-0"} h-screen w-full overflow-hidden flex flex-col items-center justify-center`}>
           
           {/* NATIVE CANVAS OR FALLBACK IMAGE BACKGROUND */}
-          <motion.div style={{ opacity: canvasOpacity }} className="absolute inset-0 z-0 bg-black">
+          <motion.div style={{ opacity: isMobile ? 1 : canvasOpacity }} className="absolute inset-0 z-0 bg-black">
             {isMobile ? (
               <img 
                 src="/images/herosection/ezgif-frame-001.jpg"
@@ -132,7 +202,7 @@ function App() {
           {/* HERO INTRO (Visible at first opening screen, fades out as you scroll) */}
           <motion.div 
             className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none z-10"
-            style={{ opacity: heroOpacity, scale: heroScale }}
+            style={{ opacity: isMobile ? 1 : heroOpacity, scale: isMobile ? 1 : heroScale }}
           >
             <motion.h1 
               initial={{ opacity: 0, y: 30 }}
@@ -444,17 +514,19 @@ function App() {
 
                   {/* Glowing Graph Area Fill */}
                   <motion.path 
-                    initial={{ d: "M 50 550 C 400 550, 600 550, 950 550 L 950 550 L 50 550 Z", opacity: 0 }}
-                    whileInView={{ d: "M 50 550 C 400 520, 600 350, 950 50 L 950 550 L 50 550 Z", opacity: 1 }}
-                    transition={{ duration: 2, ease: "easeOut" }}
+                    d="M 50 550 C 400 520, 600 350, 950 50 L 950 550 L 50 550 Z"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
                     viewport={{ once: true }}
                     fill="url(#exponentialFill)" 
                   />
 
                   {/* Animated SVG Line physically rising up into exponential growth */}
                   <motion.path 
-                    initial={{ d: "M 50 550 C 400 550, 600 550, 950 550", opacity: 0 }}
-                    whileInView={{ d: "M 50 550 C 400 520, 600 350, 950 50", opacity: 1 }}
+                    d="M 50 550 C 400 520, 600 350, 950 50"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 2, ease: "easeOut" }}
                     viewport={{ once: true }}
                     fill="none" 
@@ -466,11 +538,13 @@ function App() {
                   
                   {/* Glowing Peak Dot rising along with the line */}
                   <motion.circle 
-                    initial={{ cy: 550, opacity: 0, scale: 0.5 }}
-                    whileInView={{ cy: 50, opacity: 1, scale: 1 }}
-                    transition={{ duration: 2, ease: "easeOut" }}
+                    cx="950" 
+                    cy="50"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 1.8, ease: "easeOut" }}
                     viewport={{ once: true }}
-                    cx="950" r="10" fill="#ffffff" 
+                    r="10" fill="#ffffff" 
                     className="drop-shadow-[0_0_20px_rgba(255,255,255,1)]"
                   />
                 </svg>
@@ -610,7 +684,7 @@ function App() {
           </motion.div>
 
           {/* 6 Column Grid, scaled down tightly so it fits beautifully into completely one viewport height */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {[
               { id: 'mfQezc7jd_4', url: 'https://youtu.be/mfQezc7jd_4', num: 1 },
               { id: 'gEtRAlRnOwI', url: 'https://youtu.be/gEtRAlRnOwI', num: 2 },
