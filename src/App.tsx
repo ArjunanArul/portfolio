@@ -338,7 +338,7 @@ function App() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
-        className="relative z-20 h-screen flex flex-col justify-center px-4 md:px-8 border-t border-white/5 bg-black/75 backdrop-blur-sm"
+        className="relative z-20 min-h-screen py-24 lg:py-0 lg:h-screen flex flex-col justify-center px-4 md:px-8 border-t border-white/5 bg-black/75 backdrop-blur-sm"
       >
         <div className="w-full max-w-6xl mx-auto relative z-10 drop-shadow-2xl">
           <div className="max-w-4xl">
@@ -405,7 +405,7 @@ function App() {
       <motion.section 
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.05 }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
         className="relative z-20 py-12 lg:py-16 flex flex-col justify-center px-4 md:px-8 border-t border-white/5 bg-black/60 backdrop-blur-sm overflow-hidden"
       >
@@ -485,7 +485,7 @@ function App() {
               <div className="w-full relative z-10 opacity-100 drop-shadow-2xl flex items-center justify-center">
                 <svg 
                   viewBox="0 0 1000 600" 
-                  className="w-full h-auto max-h-[350px]"
+                  className="w-full h-[250px] sm:h-[300px] md:h-auto max-h-[350px]"
                   preserveAspectRatio="xMidYMid meet"
                 >
                   <defs>
@@ -516,9 +516,8 @@ function App() {
                   <motion.path 
                     d="M 50 550 C 400 520, 600 350, 950 50 L 950 550 L 50 550 Z"
                     initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
+                    animate={{ opacity: 1 }}
                     transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
-                    viewport={{ once: true }}
                     fill="url(#exponentialFill)" 
                   />
 
@@ -526,9 +525,8 @@ function App() {
                   <motion.path 
                     d="M 50 550 C 400 520, 600 350, 950 50"
                     initial={{ pathLength: 0, opacity: 0 }}
-                    whileInView={{ pathLength: 1, opacity: 1 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 2, ease: "easeOut" }}
-                    viewport={{ once: true }}
                     fill="none" 
                     stroke="url(#exponentialGrad)" 
                     strokeWidth="8" 
@@ -541,9 +539,8 @@ function App() {
                     cx="950" 
                     cy="50"
                     initial={{ opacity: 0, scale: 0.5 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.5, delay: 1.8, ease: "easeOut" }}
-                    viewport={{ once: true }}
                     r="10" fill="#ffffff" 
                     className="drop-shadow-[0_0_20px_rgba(255,255,255,1)]"
                   />
@@ -665,7 +662,7 @@ function App() {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.1 }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
-        className="relative z-20 h-screen flex flex-col justify-center px-4 md:px-8 border-t border-white/5 bg-black/30 backdrop-blur-md"
+        className="relative z-20 min-h-screen py-24 lg:py-0 lg:h-screen flex flex-col justify-center px-4 md:px-8 border-t border-white/5 bg-black/30 backdrop-blur-md"
       >
         <div className="w-full max-w-6xl mx-auto relative z-10 drop-shadow-2xl">
           <motion.div 
@@ -710,6 +707,10 @@ function App() {
                    src={`https://i.ytimg.com/vi/${podcast.id}/maxresdefault.jpg`} 
                    alt={`Podcast 0${podcast.num}`}
                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[800ms] ease-out"
+                   onError={(e) => {
+                     e.currentTarget.onerror = null;
+                     e.currentTarget.src = `https://i.ytimg.com/vi/${podcast.id}/mqdefault.jpg`;
+                   }}
                 />
                 
                 {/* Scaled down Play Button Overlay */}
