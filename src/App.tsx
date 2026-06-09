@@ -88,8 +88,10 @@ function App() {
     imagesRef.current = loadedImages;
   }, [isMobile]);
 
+  const preloadThreshold = 40;
+
   useEffect(() => {
-    if (!isMobile && loadedCount >= frameCount) {
+    if (!isMobile && loadedCount >= preloadThreshold) {
       const timer = setTimeout(() => {
         setIsPreloading(false);
       }, 600);
@@ -141,14 +143,14 @@ function App() {
               <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden relative">
                 <motion.div 
                   className="h-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-300 rounded-full"
-                  style={{ width: `${(loadedCount / frameCount) * 100}%` }}
+                  style={{ width: `${Math.min(100, (loadedCount / preloadThreshold) * 100)}%` }}
                 />
               </div>
 
               <div className="w-full flex justify-between text-xs text-white/60 tracking-wider">
-                <span>{loadedCount} / {frameCount} FRAMES DECODED</span>
+                <span>{Math.min(preloadThreshold, loadedCount)} / {preloadThreshold} INITIAL ASSETS DECODED</span>
                 <span className="font-bold text-white text-sm">
-                  {Math.round((loadedCount / frameCount) * 100)}%
+                  {Math.round(Math.min(100, (loadedCount / preloadThreshold) * 100))}%
                 </span>
               </div>
 
@@ -156,7 +158,7 @@ function App() {
                 <div>&gt; CONNECTING TO CDN REPOSITORY... OK</div>
                 <div>&gt; DOWNLOADING SEQUENCE: ezgif-frame-{String(Math.min(frameCount, loadedCount + 1)).padStart(3, '0')}.jpg</div>
                 <div>&gt; HARDWARE ACCELERATED RENDER PIXEL BUFFERS... ACTIVE</div>
-                <div>&gt; READY STATE: {loadedCount === frameCount ? "COMPLETE" : "COMPILING..."}</div>
+                <div>&gt; READY STATE: {loadedCount >= preloadThreshold ? "COMPLETE" : "COMPILING..."}</div>
               </div>
             </div>
           </motion.div>
@@ -482,7 +484,12 @@ function App() {
 
             {/* RIGHT SIDE: THE GRAPH (Previously left side) */}
             <div className="w-full lg:w-[55%] relative flex items-center justify-center min-h-[300px] md:min-h-[350px]">
-              <div className="w-full relative z-10 opacity-100 drop-shadow-2xl flex items-center justify-center">
+              <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
+                className="w-full relative z-10 opacity-100 drop-shadow-2xl flex items-center justify-center"
+              >
                 <svg 
                   viewBox="0 0 1000 600" 
                   className="w-full h-[250px] sm:h-[300px] md:h-auto max-h-[350px]"
@@ -515,18 +522,20 @@ function App() {
                   {/* Glowing Graph Area Fill */}
                   <motion.path 
                     d="M 50 550 C 400 520, 600 350, 950 50 L 950 550 L 50 550 Z"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: { opacity: 1, transition: { duration: 1.5, delay: 0.5, ease: "easeOut" } }
+                    }}
                     fill="url(#exponentialFill)" 
                   />
 
                   {/* Animated SVG Line physically rising up into exponential growth */}
                   <motion.path 
                     d="M 50 550 C 400 520, 600 350, 950 50"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 2, ease: "easeOut" }}
+                    variants={{
+                      hidden: { pathLength: 0, opacity: 0 },
+                      visible: { pathLength: 1, opacity: 1, transition: { duration: 2, ease: "easeOut" } }
+                    }}
                     fill="none" 
                     stroke="url(#exponentialGrad)" 
                     strokeWidth="8" 
@@ -538,14 +547,15 @@ function App() {
                   <motion.circle 
                     cx="950" 
                     cy="50"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 1.8, ease: "easeOut" }}
+                    variants={{
+                      hidden: { opacity: 0, scale: 0.5 },
+                      visible: { opacity: 1, scale: 1, transition: { duration: 0.5, delay: 1.8, ease: "easeOut" } }
+                    }}
                     r="10" fill="#ffffff" 
                     className="drop-shadow-[0_0_20px_rgba(255,255,255,1)]"
                   />
                 </svg>
-              </div>
+              </motion.div>
             </div>
             
           </div>
