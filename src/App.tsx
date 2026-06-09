@@ -929,8 +929,8 @@ function App() {
         
         {/* Contact Details */}
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mb-10 text-sm font-light text-white/60">
-          <a href="mailto:arjunanofficial@gmail.com" className="hover:text-white transition-colors font-mono">&gt; arjunanofficial@gmail.com</a>
-          <a href="tel:+918606592620" className="hover:text-white transition-colors font-mono">&gt; +91 8606592620</a>
+          <a href="mailto:arjunanofficial@gmail.com" className="hover:text-white transition-colors font-mono">&gt; EMAIL: arjunanofficial@gmail.com</a>
+          <a href="https://wa.me/918606592620" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors font-mono">&gt; WHATSAPP: +91 8606592620</a>
         </div>
 
         {/* Social Links */}
