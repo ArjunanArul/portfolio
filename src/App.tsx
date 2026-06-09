@@ -924,12 +924,33 @@ function App() {
       </motion.section>
 
       {/* FOOTER */}
-      <footer className="relative z-20 border-t border-white/5 py-12 px-6 flex flex-col items-center backdrop-blur-md bg-black/20">
-        <h2 className="text-2xl font-medium tracking-tight mb-8 uppercase text-white">Let's build the vision.</h2>
-        <div className="flex space-x-12 text-xs font-bold tracking-[0.15em] uppercase text-white/50">
-          <a href="#" className="hover:text-white transition-colors">Instagram</a>
-          <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
-          <a href="#" className="hover:text-white transition-colors">Vimeo</a>
+      <footer className="relative z-20 border-t border-white/5 py-16 px-6 flex flex-col items-center backdrop-blur-md bg-black/20 text-center">
+        <h2 className="text-2xl md:text-3xl font-medium tracking-tight mb-4 uppercase text-white">Let's build the vision.</h2>
+        
+        {/* Contact Details */}
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mb-10 text-sm font-light text-white/60">
+          <a href="mailto:arjunanofficial@gmail.com" className="hover:text-white transition-colors font-mono">&gt; arjunanofficial@gmail.com</a>
+          <a href="tel:+918606592620" className="hover:text-white transition-colors font-mono">&gt; +91 8606592620</a>
+        </div>
+
+        {/* Social Links */}
+        <div className="flex space-x-12 text-xs font-bold tracking-[0.15em] uppercase text-white/40">
+          <a 
+            href="https://www.instagram.com/arjunan_arul_" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-white hover:underline decoration-indigo-500 underline-offset-4 transition-all duration-300"
+          >
+            Instagram
+          </a>
+          <a 
+            href="https://www.linkedin.com/in/arjun-arul-97115a206/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="hover:text-white hover:underline decoration-indigo-500 underline-offset-4 transition-all duration-300"
+          >
+            LinkedIn
+          </a>
         </div>
       </footer>
     </div>
